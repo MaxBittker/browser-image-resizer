@@ -1,6 +1,6 @@
-import ExifReader from 'exifreader';
+import ExifReader from "exifreader";
 
-let img, canvas
+let img, canvas;
 
 const DEFAULT_CONFIG = {
   quality: 0.5,
@@ -8,11 +8,11 @@ const DEFAULT_CONFIG = {
   maxHeight: 600,
   autoRotate: true,
   debug: false,
-  mimeType: 'image/jpeg'
+  mimeType: "image/jpeg"
 };
 
 function dataURItoBuffer(dataURI) {
-  let byteString = atob(dataURI.split(',')[1]);
+  let byteString = atob(dataURI.split(",")[1]);
   let ab = new ArrayBuffer(byteString.length);
   let ia = new Uint8Array(ab);
   for (let i = 0; i < byteString.length; i++) {
@@ -22,23 +22,23 @@ function dataURItoBuffer(dataURI) {
   return ab;
 }
 
-function initializeOrGetImg () {
+function initializeOrGetImg() {
   if (!img) {
-    img = document.createElement('img');
+    img = document.createElement("img");
   }
-  return img
+  return img;
 }
 
-function initializeOrGetCanvas () {
+function initializeOrGetCanvas() {
   if (!canvas) {
-    canvas = document.createElement('canvas');
+    canvas = document.createElement("canvas");
   }
-  return canvas
+  return canvas;
 }
 
 export function readAndCompressImage(file, userConfig) {
   return new Promise(resolve => {
-    let img = initializeOrGetImg()
+    let img = initializeOrGetImg();
     let reader = new FileReader();
     let config = Object.assign({}, DEFAULT_CONFIG, userConfig);
 
@@ -48,7 +48,7 @@ export function readAndCompressImage(file, userConfig) {
         if (config.autoRotate) {
           if (config.debug)
             console.log(
-              'browser-image-resizer: detecting image orientation...'
+              "browser-image-resizer: detecting image orientation..."
             );
           let buffer = dataURItoBuffer(img.src);
           let Orientation = {};
@@ -58,7 +58,7 @@ export function readAndCompressImage(file, userConfig) {
           } catch (err) {}
           if (config.debug) {
             console.log(
-              'browser-image-resizer: image orientation from EXIF tag = ' +
+              "browser-image-resizer: image orientation from EXIF tag = " +
                 Orientation
             );
           }
@@ -66,7 +66,7 @@ export function readAndCompressImage(file, userConfig) {
         } else {
           if (config.debug)
             console.log(
-              'browser-image-resizer: ignoring EXIF orientation tag because autoRotate is false...'
+              "browser-image-resizer: ignoring EXIF orientation tag because autoRotate is false..."
             );
           resolve(scaleImage(img, config));
         }
@@ -78,10 +78,10 @@ export function readAndCompressImage(file, userConfig) {
 }
 
 function scaleImage(img, config, orientation = 1) {
-  let canvas = initializeOrGetCanvas()
+  let canvas = initializeOrGetCanvas();
   canvas.width = img.width;
   canvas.height = img.height;
-  let ctx = canvas.getContext('2d');
+  let ctx = canvas.getContext("2d");
   ctx.save();
 
   // EXIF
@@ -101,7 +101,7 @@ function scaleImage(img, config, orientation = 1) {
   }
 
   let imageData = canvas.toDataURL(config.mimeType, config.quality);
-  if (typeof config.onScale === 'function') config.onScale(imageData);
+  if (typeof config.onScale === "function") config.onScale(imageData);
   return dataURIToBlob(imageData);
 }
 
@@ -126,18 +126,18 @@ function findMaxWidth(config, canvas) {
 
   if (config.debug) {
     console.log(
-      'browser-image-resizer: original image size = ' +
+      "browser-image-resizer: original image size = " +
         canvas.width +
-        ' px (width) X ' +
+        " px (width) X " +
         canvas.height +
-        ' px (height)'
+        " px (height)"
     );
     console.log(
-      'browser-image-resizer: scaled image size = ' +
+      "browser-image-resizer: scaled image size = " +
         mWidth +
-        ' px (width) X ' +
+        " px (width) X " +
         Math.floor(mWidth / ratio) +
-        ' px (height)'
+        " px (height)"
     );
   }
   if (mWidth <= 0) {
@@ -190,6 +190,9 @@ function exifApplied(canvas, ctx, orientation, img) {
       ctx.translate(-width, 0);
       break;
   }
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 0, width, height);
+
   ctx.drawImage(img, 0, 0);
   ctx.restore();
 }
@@ -197,13 +200,13 @@ function exifApplied(canvas, ctx, orientation, img) {
 function dataURIToBlob(dataURI) {
   // convert base64 to raw binary data held in a string
   // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
-  let byteString = atob(dataURI.split(',')[1]);
+  let byteString = atob(dataURI.split(",")[1]);
 
   // separate out the mime component
   let mimeString = dataURI
-    .split(',')[0]
-    .split(':')[1]
-    .split(';')[0];
+    .split(",")[0]
+    .split(":")[1]
+    .split(";")[0];
 
   // write the bytes of the string to an ArrayBuffer
   let ab = new ArrayBuffer(byteString.length);
@@ -222,7 +225,7 @@ function dataURIToBlob(dataURI) {
 }
 
 function scaleCanvasWithAlgorithm(canvas, config) {
-  let scaledCanvas = document.createElement('canvas');
+  let scaledCanvas = document.createElement("canvas");
 
   let scale = config.outputWidth / canvas.width;
 
@@ -230,26 +233,30 @@ function scaleCanvasWithAlgorithm(canvas, config) {
   scaledCanvas.height = canvas.height * scale;
 
   let srcImgData = canvas
-    .getContext('2d')
+    .getContext("2d")
     .getImageData(0, 0, canvas.width, canvas.height);
   let destImgData = scaledCanvas
-    .getContext('2d')
+    .getContext("2d")
     .createImageData(scaledCanvas.width, scaledCanvas.height);
 
   applyBilinearInterpolation(srcImgData, destImgData, scale);
 
-  scaledCanvas.getContext('2d').putImageData(destImgData, 0, 0);
+  scaledCanvas.getContext("2d").putImageData(destImgData, 0, 0);
 
   return scaledCanvas;
 }
 
 function getHalfScaleCanvas(canvas) {
-  let halfCanvas = document.createElement('canvas');
+  let halfCanvas = document.createElement("canvas");
   halfCanvas.width = canvas.width / 2;
   halfCanvas.height = canvas.height / 2;
 
+  let ctx = halfCanvas.getContext("2d");
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 0, halfCanvas.width, halfCanvas.height);
+
   halfCanvas
-    .getContext('2d')
+    .getContext("2d")
     .drawImage(canvas, 0, 0, halfCanvas.width, halfCanvas.height);
 
   return halfCanvas;
